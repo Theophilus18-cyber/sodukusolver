@@ -1,0 +1,121 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+void printSudoku9x9(int arr[9][9]) {
+	cout << " " << endl;
+	for (int y = 0; y < 9; y++) {
+		for (int x = 0; x < 9; x++)
+			cout << arr[y][x] << " ";
+		cout << endl;
+	}
+	cout << " " << endl;
+
+}
+
+bool isplacebale(int arr[9][9], int row, int col, int n)
+{
+	if (arr[row][col] != 0) return false;
+	bool check = true;
+	int cellx = (col / 3) * 3;
+	int celly = (row / 3) * 3;
+	for (int i = 0; i < 9; i++) {
+		if (arr[row][i] == n) { check = false; break; }
+		if (arr[i][col] == n) { check = false; break; }
+		if (arr[celly + i / 3][cellx + i % 3] == n) { check = false; break; }
+	}
+	return check;
+}
+
+void cellEmpty(int arr[9][9], int row, int col, int& checkrow, int& checkcol)
+{
+
+	int iteration = 9 * 9 + 1;
+	for (int i = row * 9 + col + 1; i < 9 * 9; i++) {
+		if (arr[i / 9][i % 9] == 0) {
+
+			iteration = i;
+			break;
+		}
+	}
+	checkrow = iteration / 9;
+	checkcol = iteration % 9;
+	
+}
+
+void replicateArray(int arr[9][9], int myarray[9][9]) {
+	for (int y = 0; y < 9; y++)
+		for (int x = 0; x < 9; x++)
+			myarray[y][x] = arr[y][x];
+}
+std::vector<int> findcellstofill(int arr[9][9], int row, int col) {
+	vector<int> fillable = {};
+	for (int n = 1; n <= 9; n++)
+		if (isplacebale(arr, row, col, n)) fillable.push_back(n);
+	return fillable;
+}
+
+
+bool solvemysoduku(int arr[9][9], int row, int col)
+{
+	
+
+	if (row > 8) return true;
+	if (arr[row][col] != 0) {
+		int checkrow, checkcol;
+		cellEmpty(arr, row, col, checkrow, checkcol);
+		return solvemysoduku(arr, checkrow, checkcol);
+	}
+
+	std::vector<int> fillable = findcellstofill(arr, row, col);
+
+	if (fillable.size() == 0) {
+		
+		return false; 
+	
+	};
+
+	bool check = false;
+	for (int i = 0; i < fillable.size(); i++) {
+		int n = fillable[i];
+		int myarray[9][9];
+		replicateArray(arr, myarray);
+		
+		myarray[row][col] = n;
+		int checkrow = row;
+		int checkcol = col;
+		cellEmpty(myarray, row, col, checkrow, checkcol);
+		if (solvemysoduku(myarray, checkrow, checkcol)) {
+			replicateArray(myarray, arr);
+			check = true;
+			break;
+		}
+	}
+	return check;
+}
+
+
+int main(int argc, char** argv)
+{
+	int board[9][9] = {
+		{5,3,0,0,7,0,0,0,0},
+		{6,0,0,1,9,5,0,0,0},
+		{0,9,8,0,0,0,0,6,0},
+		{8,0,0,0,6,0,0,0,3},
+		{4,0,0,8,0,3,0,0,1},
+		{7,0,0,0,2,0,0,0,6},
+		{0,6,0,0,0,0,2,8,0},
+		{0,0,0,4,1,9,0,0,5},
+		{0,0,0,0,8,0,0,7,9}
+	};
+	
+	
+	if (solvemysoduku(board, 0, 0)){
+	    
+	
+	printSudoku9x9(board);}
+	
+
+	return 0;
+}
